@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guitarra Virtual</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #f1f1f1;
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            max-width: 1000px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 30px;
+        }
+
+        header {
+            text-align: center;
+            padding: 20px;
+            width: 100%;
+        }
+
+        h1 {
+            font-size: 2.8rem;
+            margin-bottom: 10px;
+            color: #ff7a45;
+            text-shadow: 0 0 10px rgba(255, 122, 69, 0.5);
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            color: #aaa;
+            margin-bottom: 20px;
+        }
+
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 10px;
+            padding: 15px;
+            background-color: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            width: 100%;
+        }
+
+        button {
+            padding: 12px 20px;
+            background: linear-gradient(to bottom, #ff7a45, #e56b3a);
+            border: none;
+            border-radius: 50px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        button:hover {
+            background: linear-gradient(to bottom, #ff8a55, #ff7a45);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .btn-active {
+            background: linear-gradient(to bottom, #2ecc71, #27ae60);
+        }
+
+        .btn-active:hover {
+            background: linear-gradient(to bottom, #3ddc81, #2ecc71);
+        }
+
+        .guitar-container {
+            position: relative;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            margin: 20px 0;
+        }
+
+        .guitar-body {
+            position: relative;
+            width: 800px;
+            height: 300px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: linear-gradient(to bottom, #222, #111);
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+            overflow: hidden;
+            padding: 20px 0;
+        }
+
+        .guitar-neck {
+            position: relative;
+            width: 90%;
+            height: 180px;
+            background: linear-gradient(to right, #8b4513, #a0522d, #8b4513);
+            border-radius: 5px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around;
+            padding: 0 20px;
+            margin-top: 20px;
+        }
+
+        .strings {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around;
+            padding: 0 20px;
+        }
+
+        .string {
+            height: 2px;
+            background: linear-gradient(to right, #f0f0f0, #ccc, #f0f0f0);
+            position: relative;
+            z-index: 1;
+        }
+
+        .frets {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 10px;
+        }
+
+        .fret {
+            width: 2px;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .fret:nth-child(1) {
+            background: rgba(255, 255, 255, 0.4);
+            width: 4px;
+        }
+
+        .notes {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 10px;
+        }
+
+        .note-column {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around;
+            height: 100%;
+            width: calc(100% / 13);
+        }
+
+        .note {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(255, 122, 69, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto;
+            cursor: pointer;
+            transition: all 0.1s ease;
+            border: 2px solid rgba(255, 122, 69, 0.3);
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9rem;
+            font-weight: bold;
+            z-index: 2;
+            position: relative;
+        }
+
+        .note:hover {
+            background: rgba(255, 122, 69, 0.3);
+            transform: scale(1.1);
+        }
+
+        .note.active {
+            background: rgba(255, 122, 69, 0.9);
+            transform: scale(1.2);
+            box-shadow: 0 0 15px rgba(255, 122, 69, 0.7);
+            border-color: rgba(255, 255, 255, 0.8);
+            color: white;
+        }
+
+        .string-names {
+            position: absolute;
+            left: -50px;
+            top: 0;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around;
+            color: #ff7a45;
+            font-weight: bold;
+        }
+
+        .instructions {
+            background-color: rgba(0, 0, 0, 0.4);
+            border-radius: 10px;
+            padding: 20px;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .instructions h2 {
+            color: #ff7a45;
+            margin-bottom: 15px;
+            font-size: 1.5rem;
+        }
+
+        .instructions p {
+            margin-bottom: 10px;
+            line-height: 1.5;
+        }
+
+        .keyboard-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .key {
+            padding: 8px 12px;
+            background-color: rgba(255, 122, 69, 0.2);
+            border-radius: 5px;
+            font-family: monospace;
+            font-weight: bold;
+            border: 1px solid rgba(255, 122, 69, 0.5);
+        }
+
+        footer {
+            margin-top: 20px;
+            text-align: center;
+            color: #888;
+            font-size: 0.9rem;
+        }
+
+        .volume-control {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .volume-control input {
+            width: 120px;
+        }
+
+        .current-chord {
+            font-size: 1.2rem;
+            color: #ff7a45;
+            font-weight: bold;
+            min-height: 30px;
+            text-align: center;
+        }
+
+        @media (max-width: 850px) {
+            .guitar-body {
+                width: 95%;
+                height: 250px;
+            }
+            
+            .guitar-neck {
+                height: 150px;
+            }
+            
+            .note {
+                width: 30px;
+                height: 30px;
+                font-size: 0.7rem;
+            }
+            
+            h1 {
+                font-size: 2.2rem;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .guitar-body {
+                height: 220px;
+            }
+            
+            .guitar-neck {
+                height: 130px;
+            }
+            
+            .note {
+                width: 25px;
+                height: 25px;
+                font-size: 0.6rem;
+            }
+            
+            .controls {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .controls button {
+                width: 80%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-guitar"></i> Guitarra Virtual</h1>
+            <p class="subtitle">Toque as notas com o mouse ou use o teclado para criar música</p>
+        </header>
+
+        <div class="controls">
+            <button id="playChord">
+                <i class="fas fa-play"></i> Tocar Acorde
+            </button>
+            <button id="strum">
+                <i class="fas fa-guitar"></i> Palhetada
+            </button>
+            <button id="clear">
+                <i class="fas fa-eraser"></i> Limpar
+            </button>
+            <div class="volume-control">
+                <i class="fas fa-volume-up"></i>
+                <input type="range" id="volume" min="0" max="100" value="70">
+            </div>
+        </div>
+
+        <div class="current-chord" id="currentChord">
+            Notas selecionadas aparecerão aqui
+        </div>
+
+        <div class="guitar-container">
+            <div class="guitar-body">
+                <div class="string-names">
+                    <div>E</div>
+                    <div>A</div>
+                    <div>D</div>
+                    <div>G</div>
+                    <div>B</div>
+                    <div>E</div>
+                </div>
+                
+                <div class="guitar-neck">
+                    <div class="strings">
+                        <div class="string"></div>
+                        <div class="string"></div>
+                        <div class="string"></div>
+                        <div class="string"></div>
+                        <div class="string"></div>
+                        <div class="string"></div>
+                    </div>
+                    
+                    <div class="frets">
+                        <div class="fret"></div>
+                        <div class="fret"></div>
+                        <div class="fret"></div>
+                        <div class="fret"></div>
+                        <div class="fret"></div>
+                        <div class="fret"></div>
+                        <div class="fret"></div>
+                        <div class="fret"></div>
+                        <div class="fret"></div>
+                        <div class="fret"></div>
+                        <div class="fret"></div>
+                        <div class="fret"></div>
+                        <div class="fret"></div>
+                    </div>
+                    
+                    <div class="notes" id="notesContainer">
+                        <!-- As notas da guitarra serão geradas via JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="instructions">
+            <h2><i class="fas fa-info-circle"></i> Como tocar</h2>
+            <p>1. Clique nas casas da guitarra para selecionar notas</p>
+            <p>2. Use o botão "Tocar Acorde" para tocar todas as notas selecionadas</p>
+            <p>3. Use o botão "Palhetada" para tocar as cordas individualmente</p>
+            <p>4. Use o botão "Limpar" para desmarcar todas as notas selecionadas</p>
+            
+            <h3 style="margin-top: 15px;">Controles do teclado:</h3>
+            <div class="keyboard-controls">
+                <div class="key">1-6</div>
+                <span>Selecionar cordas (de cima para baixo)</span>
+                <div class="key">Q-P</div>
+                <span>Selecionar casas (0-12)</span>
+                <div class="key">Espaço</div>
+                <span>Tocar acorde</span>
+                <div class="key">S</div>
+                <span>Palhetada</span>
+                <div class="key">C</div>
+                <span>Limpar seleção</span>
+            </div>
+        </div>
+
+        <footer>
+            <p>Guitarra Virtual - Desenvolvida com HTML, CSS e JavaScript</p>
+        </footer>
+    </div>
+
+    <script>
+        // Notas da guitarra (6 cordas x 13 casas)
+        const guitarNotes = [
+            ['E4', 'F4', 'F#4', 'G4', 'G#4', 'A4', 'A#4', 'B4', 'C5', 'C#5', 'D5', 'D#5', 'E5'], // Corda 1 (Mi agudo)
+            ['B3', 'C4', 'C#4', 'D4', 'D#4', 'E4', 'F4', 'F#4', 'G4', 'G#4', 'A4', 'A#4', 'B4'], // Corda 2 (Si)
+            ['G3', 'G#3', 'A3', 'A#3', 'B3', 'C4', 'C#4', 'D4', 'D#4', 'E4', 'F4', 'F#4', 'G4'], // Corda 3 (Sol)
+            ['D3', 'D#3', 'E3', 'F3', 'F#3', 'G3', 'G#3', 'A3', 'A#3', 'B3', 'C4', 'C#4', 'D4'], // Corda 4 (Ré)
+            ['A2', 'A#2', 'B2', 'C3', 'C#3', 'D3', 'D#3', 'E3', 'F3', 'F#3', 'G3', 'G#3', 'A3'], // Corda 5 (Lá)
+            ['E2', 'F2', 'F#2', 'G2', 'G#2', 'A2', 'A#2', 'B2', 'C3', 'C#3', 'D3', 'D#3', 'E3']  // Corda 6 (Mi grave)
+        ];
+
+        // Nomes das cordas para exibição
+        const stringNames = ['E', 'B', 'G', 'D', 'A', 'E'];
+        
+        // Frequências das notas (em Hz)
+        const noteFrequencies = {
+            'C2': 65.41, 'C#2': 69.30, 'D2': 73.42, 'D#2': 77.78, 'E2': 82.41, 'F2': 87.31, 'F#2': 92.50, 'G2': 98.00, 'G#2': 103.83, 'A2': 110.00, 'A#2': 116.54, 'B2': 123.47,
+            'C3': 130.81, 'C#3': 138.59, 'D3': 146.83, 'D#3': 155.56, 'E3': 164.81, 'F3': 174.61, 'F#3': 185.00, 'G3': 196.00, 'G#3': 207.65, 'A3': 220.00, 'A#3': 233.08, 'B3': 246.94,
+            'C4': 261.63, 'C#4': 277.18, 'D4': 293.66, 'D#4': 311.13, 'E4': 329.63, 'F4': 349.23, 'F#4': 369.99, 'G4': 392.00, 'G#4': 415.30, 'A4': 440.00, 'A#4': 466.16, 'B4': 493.88,
+            'C5': 523.25, 'C#5': 554.37, 'D5': 587.33, 'D#5': 622.25, 'E5': 659.25, 'F5': 698.46, 'F#5': 739.99, 'G5': 783.99, 'G#5': 830.61, 'A5': 880.00, 'A#5': 932.33, 'B5': 987.77
+        };
+
+        // Estado da guitarra
+        let selectedNotes = [];
+        let audioContext;
+        let volume = 0.7;
+
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', function() {
+            createGuitarNotes();
+            setupEventListeners();
+            updateCurrentChord();
+            
+            // Configurar controle de volume
+            const volumeControl = document.getElementById('volume');
+            volumeControl.addEventListener('input', function() {
+                volume = this.value / 100;
+            });
+        });
+
+        // Criar as notas da guitarra na interface
+        function createGuitarNotes() {
+            const notesContainer = document.getElementById('notesContainer');
+            
+            // Criar 13 colunas (uma para cada casa)
+            for (let fret = 0; fret < 13; fret++) {
+                const noteColumn = document.createElement('div');
+                noteColumn.className = 'note-column';
+                
+                // Criar 6 notas em cada coluna (uma para cada corda)
+                for (let string = 0; string < 6; string++) {
+                    const note = document.createElement('div');
+                    note.className = 'note';
+                    note.dataset.string = string;
+                    note.dataset.fret = fret;
+                    note.dataset.note = guitarNotes[string][fret];
+                    
+                    // Exibir o nome da nota na casa 0 (corda solta)
+                    if (fret === 0) {
+                        note.textContent = stringNames[string];
+                        note.style.backgroundColor = 'rgba(255, 122, 69, 0.4)';
+                    } else {
+                        note.textContent = guitarNotes[string][fret].replace(/\d/g, '');
+                    }
+                    
+                    note.addEventListener('click', function() {
+                        toggleNote(string, fret, this);
+                    });
+                    
+                    noteColumn.appendChild(note);
+                }
+                
+                notesContainer.appendChild(noteColumn);
+            }
+        }
+
+        // Configurar ouvintes de eventos
+        function setupEventListeners() {
+            // Botões de controle
+            document.getElementById('playChord').addEventListener('click', playChord);
+            document.getElementById('strum').addEventListener('click', strumChord);
+            document.getElementById('clear').addEventListener('click', clearNotes);
+            
+            // Controles do teclado
+            document.addEventListener('keydown', handleKeyDown);
+        }
+
+        // Alternar seleção de uma nota
+        function toggleNote(string, fret, element) {
+            const noteIndex = selectedNotes.findIndex(n => n.string === string && n.fret === fret);
+            
+            if (noteIndex === -1) {
+                // Adicionar nota
+                selectedNotes.push({
+                    string: string,
+                    fret: fret,
+                    note: guitarNotes[string][fret],
+                    element: element
+                });
+                element.classList.add('active');
+            } else {
+                // Remover nota
+                selectedNotes.splice(noteIndex, 1);
+                element.classList.remove('active');
+            }
+            
+            updateCurrentChord();
+            playNote(guitarNotes[string][fret]);
+        }
+
+        // Tocar uma nota individual
+        function playNote(noteName) {
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            // Configurar tipo de onda (simula som de guitarra)
+            oscillator.type = 'sawtooth';
+            
+            // Configurar frequência da nota
+            if (noteFrequencies[noteName]) {
+                oscillator.frequency.setValueAtTime(noteFrequencies[noteName], audioContext.currentTime);
+            } else {
+                // Fallback: calcular frequência aproximada se não estiver no dicionário
+                const baseNote = noteName.replace(/\d/g, '');
+                const octave = parseInt(noteName.replace(/\D/g, ''));
+                const baseFreq = 440; // A4
+                oscillator.frequency.setValueAtTime(baseFreq * Math.pow(2, (octave - 4)), audioContext.currentTime);
+            }
+            
+            // Configurar envelope (ataque e decaimento)
+            gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+            gainNode.gain.linearRampToValueAtTime(volume, audioContext.currentTime + 0.05);
+            gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 1.0);
+            
+            // Iniciar e parar a nota
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 1.0);
+        }
+
+        // Tocar o acorde completo
+        function playChord() {
+            if (selectedNotes.length === 0) return;
+            
+            // Tocar todas as notas selecionadas simultaneamente
+            selectedNotes.forEach(note => {
+                playNote(note.note);
+            });
+        }
+
+        // Palhetar (tocar as notas sequencialmente)
+        function strumChord() {
+            if (selectedNotes.length === 0) return;
+            
+            // Ordenar notas por corda (de grave para agudo)
+            const sortedNotes = [...selectedNotes].sort((a, b) => b.string - a.string);
+            
+            // Tocar cada nota com um pequeno atraso
+            sortedNotes.forEach((note, index) => {
+                setTimeout(() => {
+                    playNote(note.note);
+                }, index * 100);
+            });
+        }
+
+        // Limpar todas as notas selecionadas
+        function clearNotes() {
+            selectedNotes.forEach(note => {
+                note.element.classList.remove('active');
+            });
+            selectedNotes = [];
+            updateCurrentChord();
+        }
+
+        // Atualizar o acorde atual exibido
+        function updateCurrentChord() {
+            const currentChordElement = document.getElementById('currentChord');
+            
+            if (selectedNotes.length === 0) {
+                currentChordElement.textContent = 'Nenhuma nota selecionada';
+                return;
+            }
+            
+            // Extrair nomes das notas
+            const noteNames = selectedNotes.map(n => n.note.replace(/\d/g, ''));
+            
+            // Remover duplicatas e ordenar
+            const uniqueNotes = [...new Set(noteNames)].sort();
+            
+            // Tentar identificar o acorde
+            const chordName = identifyChord(uniqueNotes);
+            
+            currentChordElement.textContent = `Notas: ${uniqueNotes.join(', ')} ${chordName ? `- Possível acorde: ${chordName}` : ''}`;
+        }
+
+        // Identificar acorde simples (apenas para demonstração)
+        function identifyChord(notes) {
+            // Mapeamento básico de acordes
+            const chordMap = {
+                'CEG': 'C Maior',
+                'DF#A': 'D Maior',
+                'EG#B': 'E Maior',
+                'FAC': 'F Maior',
+                'GBD': 'G Maior',
+                'ACE': 'A Maior',
+                'CEbG': 'C Menor',
+                'DFA': 'D Menor',
+                'EGB': 'E Menor',
+                'FAbC': 'F Menor',
+                'GBbD': 'G Menor',
+                'ACbE': 'A Menor'
+            };
+            
+            const noteString = notes.sort().join('');
+            
+            // Verificar se o acorde está no mapa
+            for (const [chordNotes, chordName] of Object.entries(chordMap)) {
+                if (noteString === chordNotes) {
+                    return chordName;
+                }
+            }
+            
+            return '';
+        }
+
+        // Manipular teclas do teclado
+        function handleKeyDown(event) {
+            // Evitar comportamento padrão para teclas que usamos
+            if ('123456qwertyuiop s c'.includes(event.key.toLowerCase())) {
+                event.preventDefault();
+            }
+            
+            // Teclas 1-6: selecionar cordas
+            if (event.key >= '1' && event.key <= '6') {
+                const stringIndex = parseInt(event.key) - 1;
+                // Selecionar a casa 0 da corda correspondente
+                const noteElement = document.querySelector(`.note[data-string="${stringIndex}"][data-fret="0"]`);
+                if (noteElement) {
+                    toggleNote(stringIndex, 0, noteElement);
+                }
+            }
+            
+            // Teclas Q-P: selecionar casas 0-12
+            const keyToFretMap = {
+                'q': 0, 'w': 1, 'e': 2, 'r': 3, 't': 4, 'y': 5,
+                'u': 6, 'i': 7, 'o': 8, 'p': 9, '[': 10, ']': 11, '\\': 12
+            };
+            
+            if (keyToFretMap.hasOwnProperty(event.key.toLowerCase())) {
+                const fret = keyToFretMap[event.key.toLowerCase()];
+                // Selecionar todas as cordas na casa correspondente
+                for (let string = 0; string < 6; string++) {
+                    const noteElement = document.querySelector(`.note[data-string="${string}"][data-fret="${fret}"]`);
+                    if (noteElement) {
+                        // Verificar se a nota já está selecionada
+                        const isAlreadySelected = selectedNotes.some(n => n.string === string && n.fret === fret);
+                        if (!isAlreadySelected) {
+                            toggleNote(string, fret, noteElement);
+                        }
+                    }
+                }
+            }
+            
+            // Espaço: tocar acorde
+            if (event.key === ' ') {
+                playChord();
+            }
+            
+            // S: palhetada
+            if (event.key.toLowerCase() === 's') {
+                strumChord();
+            }
+            
+            // C: limpar
+            if (event.key.toLowerCase() === 'c') {
+                clearNotes();
+            }
+        }
+    </script>
+</body>
+</html>

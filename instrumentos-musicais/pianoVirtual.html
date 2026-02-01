@@ -1,0 +1,152 @@
+﻿<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Neon Piano Pro</title>
+
+<style>
+body{
+    margin:0;
+    background:radial-gradient(circle at center,#12121a,#07070c);
+    font-family:Segoe UI, sans-serif;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    color:white;
+}
+
+h1{margin:20px 0 10px;font-weight:200;letter-spacing:4px}
+
+.piano{
+    position:relative;
+    display:flex;
+    padding:30px 30px 40px;
+    border-radius:20px;
+    background:linear-gradient(145deg,#111,#0b0b11);
+    box-shadow:0 40px 80px rgba(0,0,0,.7);
+}
+
+/* --- WHITE KEYS --- */
+.white{
+    width:46px;
+    height:270px;
+    background:linear-gradient(#fff,#ddd);
+    border-radius:0 0 8px 8px;
+    margin:0 2px;
+    position:relative;
+    z-index:1;
+}
+.white.active{
+    background:linear-gradient(#00f0ff,#00bcd4);
+    box-shadow:0 0 25px #00f0ff;
+}
+
+/* --- BLACK KEYS --- */
+.black{
+    width:28px;
+    height:165px;
+    background:linear-gradient(#000,#222);
+    position:absolute;
+    z-index:5;
+    border-radius:0 0 6px 6px;
+    box-shadow:0 8px 14px rgba(0,0,0,.9);
+}
+.black.active{
+    background:linear-gradient(#ff0080,#b00050);
+    box-shadow:0 0 20px #ff0080;
+}
+</style>
+</head>
+<body>
+
+<h1>NEON PIANO</h1>
+<div class="piano" id="piano"></div>
+
+<script>
+const ctx=new(window.AudioContext||window.webkitAudioContext)();
+const piano=document.getElementById("piano");
+const active={};
+
+const whiteMap=[0,2,4,5,7,9,11];
+const blackMap=[1,3,null,6,8,10,null];
+const startOct=1, octaves=7;
+
+function freq(m){return 440*Math.pow(2,(m-69)/12);}
+
+let whiteKeys=[];
+
+for(let o=0;o<octaves;o++){
+  for(let i=0;i<7;i++){
+    const midi=(startOct+o)*12+whiteMap[i];
+    const w=document.createElement("div");
+    w.className="white";
+    w.dataset.midi=midi;
+    piano.appendChild(w);
+    whiteKeys.push(w);
+  }
+}
+
+whiteKeys.forEach((w,i)=>{
+  const patternIndex=i%7;
+  const blackOffset=blackMap[patternIndex];
+  if(blackOffset!==null){
+    const rect=w.getBoundingClientRect();
+    const pianoRect=piano.getBoundingClientRect();
+
+    const b=document.createElement("div");
+    b.className="black";
+    b.dataset.midi=parseInt(w.dataset.midi)+1;
+
+    // centraliza entre esta branca e a próxima
+    const next=whiteKeys[i+1];
+    const mid=(w.offsetLeft + next.offsetLeft)/2;
+    b.style.left=(mid - 14)+"px";
+
+    piano.appendChild(b);
+  }
+});
+
+function attack(g){
+  let t=ctx.currentTime;
+  g.gain.setValueAtTime(0,t);
+  g.gain.linearRampToValueAtTime(1,t+.02);
+}
+function release(g){
+  let t=ctx.currentTime;
+  g.gain.linearRampToValueAtTime(0,t+.35);
+}
+
+function play(m){
+  if(active[m])return;
+  let g=ctx.createGain();
+  g.connect(ctx.destination);
+  attack(g);
+  let o=ctx.createOscillator();
+  o.type="triangle";
+  o.frequency.value=freq(m);
+  o.connect(g); o.start();
+  active[m]={o,g};
+}
+function stop(m){
+  let n=active[m];
+  if(!n)return;
+  release(n.g);
+  setTimeout(()=>{n.o.stop();delete active[m]},400);
+}
+
+piano.addEventListener("mousedown",e=>{
+  const k=e.target.closest(".white,.black");
+  if(!k)return;
+  k.classList.add("active");
+  play(k.dataset.midi);
+});
+document.addEventListener("mouseup",()=>{
+  document.querySelectorAll(".active").forEach(k=>{
+    k.classList.remove("active");
+    stop(k.dataset.midi);
+  });
+});
+</script>
+</body>
+</html>
